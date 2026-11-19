@@ -546,17 +546,22 @@ addEventListener("hashchange",swap);go();
 document.getElementById("f").addEventListener("submit",function(e){e.preventDefault();var f=this,m=document.getElementById("msg");
 send({email:f.querySelector("input").value,message:"Please add this address to the newsletter list.",_subject:"Newsletter sign-up",_template:"table",_captcha:"false"},
 function(){m.textContent="Thank you for signing up.";f.reset()},function(why){m.textContent=why&&why!=="network"?"Not sent: "+why:"Sorry, that did not go through. Please try again."})});
-var MAIL="https://formsubmit.co/ajax/2e12c9442751584d062f230d6c2641a6";
-function send(data,ok,fail){var done=false,c=window.AbortController?new AbortController():null,t=setTimeout(function(){if(done)return;done=true;if(c)c.abort();fail("network")},12000);
-function fin(fn,a){if(done)return;done=true;clearTimeout(t);fn(a)}
-fetch(MAIL,{method:"POST",headers:{"Content-Type":"application/json","Accept":"application/json"},body:JSON.stringify(data),signal:c?c.signal:undefined}).then(function(r){return r.text()}).then(function(x){var j={};try{j=JSON.parse(x)}catch(e){}if(j.success===true||j.success==="true")fin(ok);else fin(fail,j.message||"network")}).catch(function(){fin(fail,"network")})}
+var MAIL="https://formsubmit.co/2e12c9442751584d062f230d6c2641a6";
+function send(data,ok,fail){var fr=document.getElementById("mailframe");if(!fr){fr=document.createElement("iframe");fr.name="mailframe";fr.id="mailframe";fr.title="mail";fr.tabIndex=-1;fr.setAttribute("aria-hidden","true");fr.style.cssText="position:absolute;width:0;height:0;border:0;visibility:hidden";document.body.appendChild(fr)}
+var done=false,armed=false,t=setTimeout(function(){fin(fail,"network")},30000);
+function fin(fn,a){if(done)return;done=true;clearTimeout(t);fr.onload=null;fn(a)}
+var f=document.createElement("form");f.method="POST";f.action=MAIL;f.target="mailframe";f.style.display="none";f.acceptCharset="UTF-8";
+for(var k in data){var i=document.createElement("input");i.type="hidden";i.name=k;i.value=data[k];f.appendChild(i)}
+document.body.appendChild(f);
+fr.onload=function(){if(!armed)return;fin(ok)};
+armed=true;f.submit();setTimeout(function(){if(f.parentNode)f.parentNode.removeChild(f)},1000)}
 document.getElementById("cf").addEventListener("submit",function(e){e.preventDefault();var f=this,b=f.querySelector("button"),err=document.getElementById("cferr"),ok=document.getElementById("sent");
 if(f.elements._honey&&f.elements._honey.value)return;
 err.hidden=true;ok.hidden=true;b.disabled=true;b.textContent="Sending…";
 send({name:f.elements.name.value,email:f.elements.email.value,message:f.elements.message.value,_subject:"New message from the Inua Jamii Foundation website",_template:"table",_captcha:"false"},
 function(){ok.hidden=false;f.reset();b.disabled=false;b.textContent="Send message"},
 function(why){var mt="mailto:mutisobryan173@gmail.com?subject="+encodeURIComponent("Message from the website")+"&body="+encodeURIComponent((f.elements.message.value||"")+"\n\n"+(f.elements.name.value||"")+" ("+(f.elements.email.value||"")+")");
-if(why&&why!=="network"){err.textContent="Message not sent: "+why}else{err.innerHTML='Sorry, that took too long. Please try again, or <a href="'+mt+'" style="text-decoration:underline">tap here to send it from your email app</a>.'}err.hidden=false;b.disabled=false;b.textContent="Send message"})});
+if(why&&why!=="network"){err.textContent="Message not sent: "+why}else{err.innerHTML='Sorry, we could not confirm that it was sent. Please try again, or <a href="'+mt+'" style="text-decoration:underline">tap here to send it from your email app</a>.'}err.hidden=false;b.disabled=false;b.textContent="Send message"})});
 </script><script>
 (function(){var els=document.querySelectorAll('.stats b');if(!els.length)return;
 if(matchMedia('(prefers-reduced-motion: reduce)').matches||!('IntersectionObserver' in window))return;
