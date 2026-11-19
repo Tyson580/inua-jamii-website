@@ -523,15 +523,15 @@ document.addEventListener("click",function(e){if(e.target.closest('a[href^="#"]'
 addEventListener("hashchange",swap);go();
 document.getElementById("f").addEventListener("submit",function(e){e.preventDefault();var f=this,m=document.getElementById("msg");
 send({email:f.querySelector("input").value,message:"Please add this address to the newsletter list.",_subject:"Newsletter sign-up",_template:"table",_captcha:"false"},
-function(){m.textContent="Thank you for signing up.";f.reset()},function(){m.textContent="Sorry, that did not go through. Please try again."})});
+function(){m.textContent="Thank you for signing up.";f.reset()},function(why){m.textContent=why&&why!=="network"?"Not sent: "+why:"Sorry, that did not go through. Please try again."})});
 var MAIL="https://formsubmit.co/ajax/mutisobryan173@gmail.com";
-function send(data,ok,fail){fetch(MAIL,{method:"POST",headers:{"Content-Type":"application/json","Accept":"application/json"},body:JSON.stringify(data)}).then(function(r){return r.json()}).then(function(j){if(j&&(j.success===true||j.success==="true"))ok();else fail()}).catch(fail)}
+function send(data,ok,fail){fetch(MAIL,{method:"POST",headers:{"Content-Type":"application/json","Accept":"application/json"},body:JSON.stringify(data)}).then(function(r){return r.text()}).then(function(t){var j={};try{j=JSON.parse(t)}catch(e){}if(j.success===true||j.success==="true")ok();else fail(j.message||"")}).catch(function(){fail("network")})}
 document.getElementById("cf").addEventListener("submit",function(e){e.preventDefault();var f=this,b=f.querySelector("button"),err=document.getElementById("cferr"),ok=document.getElementById("sent");
 if(f.elements._honey&&f.elements._honey.value)return;
 err.hidden=true;ok.hidden=true;b.disabled=true;b.textContent="Sending…";
 send({name:f.elements.name.value,email:f.elements.email.value,message:f.elements.message.value,_subject:"New message from the Inua Jamii Foundation website",_template:"table",_captcha:"false"},
 function(){ok.hidden=false;f.reset();b.disabled=false;b.textContent="Send message"},
-function(){err.hidden=false;b.disabled=false;b.textContent="Send message"})});
+function(why){err.textContent=why&&why!=="network"?"Message not sent: "+why:"Sorry, your message could not be sent. Please check your connection and try again, or email us at mutisobryan173@gmail.com.";err.hidden=false;b.disabled=false;b.textContent="Send message"})});
 </script><script>
 (function(){var els=document.querySelectorAll('.stats b');if(!els.length)return;
 if(matchMedia('(prefers-reduced-motion: reduce)').matches||!('IntersectionObserver' in window))return;
